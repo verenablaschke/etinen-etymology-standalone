@@ -1,0 +1,8 @@
+/target/
+/src/test/resources/
+.project
+.settings/
+.classpath
+pom.xml
+.idea
+psl.iml

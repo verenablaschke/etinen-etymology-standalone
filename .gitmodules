@@ -1,0 +1,12 @@
+[submodule "etinen-etymology"]
+	path = etinen-etymology
+	url = https://github.com/verenablaschke/etinen-etymology
+[submodule "etinen-shared"]
+	path = etinen-shared
+	url = https://github.com/jdellert/etinen-shared
+[submodule "psl-infrastructure"]
+	path = psl-infrastructure
+	url = https://github.com/jdellert/psl-infrastructure
+[submodule "iwsa"]
+	path = iwsa
+	url = https://github.com/jdellert/iwsa
