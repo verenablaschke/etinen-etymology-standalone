@@ -1,15 +1,15 @@
 [submodule "etinen-etymology"]
 	path = etinen-etymology
-	url = https://github.com/verenablaschke/etinen-etymology
+	url = git@github.com:verenablaschke/etinen-etymology.git
 [submodule "etinen-shared"]
 	path = etinen-shared
-	url = https://github.com/jdellert/etinen-shared
+	url = git@github.com:jdellert/etinen-shared.git
 [submodule "psl-infrastructure"]
 	path = psl-infrastructure
-	url = https://github.com/jdellert/psl-infrastructure
+	url = git@github.com:jdellert/psl-infrastructure.git
 [submodule "iwsa"]
 	path = iwsa
-	url = https://github.com/jdellert/iwsa
+	url = git@github.com:jdellert/iwsa.git
 [submodule "psl-ragviewer"]
 	path = psl-ragviewer
 	url = git@github.com:verenablaschke/psl-ragviewer.git
