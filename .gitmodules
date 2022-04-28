@@ -10,3 +10,6 @@
 [submodule "iwsa"]
 	path = iwsa
 	url = https://github.com/jdellert/iwsa
+[submodule "psl-ragviewer"]
+	path = psl-ragviewer
+	url = git@github.com:verenablaschke/psl-ragviewer.git
