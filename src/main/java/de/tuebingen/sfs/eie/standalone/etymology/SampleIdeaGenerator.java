@@ -70,6 +70,7 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 		// Form atoms
 		// TODO check EtymologicalTheory to see if confirm Einh/Eloa/Eety belief values
 		// from previous inferences can be used here
+		int maxDist = -1;
 		for (String lang : langsToForms.keySet()) {
 			for (String formId : langsToForms.get(lang)) {
 				pslProblem.addTarget("Eunk", formId);
@@ -91,6 +92,22 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 						pslProblem.addTarget("Einh", formId, parentFormId);
 					}
 				}
+			}
+			for (String lang2 : langsToForms.keySet()) {
+				int dist = data.phylo.distance(lang, lang2);
+				if (dist > maxDist) {
+					maxDist = dist;
+				}
+				for (String formId1 : langsToForms.get(lang)) {
+					for (String formId2 : langsToForms.get(lang2)) {
+						pslProblem.addObservation("Xdst", 1.0, formId1, formId2, dist + "");
+					}
+				}
+			}
+		}
+		for (int i = maxDist; i > 0; i--) {
+			for (int j = i - 1; j >= 0; j--) {
+				pslProblem.addObservation("Xsth", 1.0, j + "", i + "");
 			}
 		}
 
@@ -154,19 +171,20 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 	private void addHomsetInfo(String formId, Set<String> homPegs, Map<String, String> formsToPegs) {
 		String pegForForm = formsToPegs.get(formId);
 		System.err.println("PEG: " + formId + " " + pegForForm);
+		// Currently assuming there's just one concept: C1
 		if (pegForForm == null) {
 			for (String homPeg : homPegs) {
-				pslProblem.addTarget("Fhom", formId, homPeg);
-				System.err.println("Fhom(" + formId + ", " + homPeg + ")");
+				pslProblem.addTarget("Fhom", formId, homPeg, "C1");
+				System.err.println("Fhom(" + formId + ", " + homPeg + ", C1)");
 			}
 		} else {
 			for (String homPeg : homPegs) {
 				if (homPeg.equals(pegForForm)) {
-					pslProblem.addObservation("Fhom", 1.0, formId, homPeg);
-					System.err.println("Fhom(" + formId + ", " + homPeg + ") 1.0");
+					pslProblem.addObservation("Fhom", 1.0, formId, homPeg, "C1");
+					System.err.println("Fhom(" + formId + ", " + homPeg + ", C1) 1.0");
 				} else {
-					pslProblem.addObservation("Fhom", 0.0, formId, homPeg);
-					System.err.println("Fhom(" + formId + ", " + homPeg + ") 0.0");
+					pslProblem.addObservation("Fhom", 0.0, formId, homPeg, "C1");
+					System.err.println("Fhom(" + formId + ", " + homPeg + ", C1) 0.0");
 				}
 			}
 		}
