@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +21,9 @@ import de.tuebingen.sfs.eie.shared.core.LanguageTree;
 import de.tuebingen.sfs.eie.shared.util.Pair;
 
 public class SampleData {
+
+	static int inhDist = 1;
+	static int loanDist = 0;
 
 	Map<Pair<String, String>, Integer> formDistances = new HashMap<>();
 	Set<String> forms = new HashSet<>();
@@ -43,6 +48,22 @@ public class SampleData {
 		for (String knownForm : knownForms) {
 			formsToPegs.put(knownForm, peg);
 		}
+
+		System.err.println("FORMS");
+		System.err.println(forms);
+		System.err.println();
+		System.err.println("FORM DISTANCES");
+		System.err.println(formDistances);
+		System.err.println();
+		System.err.println("KNOWN FORMS");
+		System.err.println(knownForms);
+		System.err.println();
+		System.err.println("FORMS TO PEGS");
+		System.err.println(formsToPegs);
+		System.err.println();
+		System.err.println("FORMS TO LANGS");
+		System.err.println(formsToLangs);
+		System.err.println();
 	}
 
 	private void readEtymology(String file) {
@@ -65,20 +86,21 @@ public class SampleData {
 
 				// Language tree link
 				String form = line.replace("->", "").strip();
+				int distToSource = line.contains("->") ? loanDist : inhDist;
 				forms.add(form);
 				formsToLangs.put(form, form.replace("w", "L"));
-				formDistances.put(new Pair<>(form, LanguageTree.root), curIndent + 1);
-				formDistances.put(new Pair<>(LanguageTree.root, form), curIndent + 1);
 
-				int indentMod = 0;
-				while (curIndent + indentMod++ <= prevIndent) {
+				while (curIndent <= prevIndent--) {
 					sourceStack.pop();
 				}
 				String source = sourceStack.peek();
 				formToSource.put(form, source);
-				formDistances.put(new Pair<>(form, source), 1);
-				formDistances.put(new Pair<>(source, form), 1);
+				formDistances.put(new Pair<>(form, source), distToSource);
+				formDistances.put(new Pair<>(source, form), distToSource);
 				formDistances.put(new Pair<>(form, form), 0);
+				int distSourceToRoot = formDistances.get(new Pair<>(source, LanguageTree.root));
+				formDistances.put(new Pair<>(form, LanguageTree.root), distSourceToRoot + distToSource);
+				formDistances.put(new Pair<>(LanguageTree.root, form), distSourceToRoot + distToSource);
 				sourceStack.push(form);
 				prevIndent = curIndent;
 			}
@@ -93,30 +115,42 @@ public class SampleData {
 									new Pair<>(lowestCommonAncestor(form1, form2, formToSource), LanguageTree.root));
 					formDistances.put(new Pair<>(form1, form2), dist);
 					formDistances.put(new Pair<>(form2, form1), dist);
+//					System.err.println("====");
+//					System.err.println(form1 + " " + formDistances.get(new Pair<>(form1, LanguageTree.root)));
+//					System.err.println(form2 + " " + formDistances.get(new Pair<>(form2, LanguageTree.root)));
+//					System.err.println(lowestCommonAncestor(form1, form2, formToSource) + " " + formDistances
+//							.get(new Pair<>(lowestCommonAncestor(form1, form2, formToSource), LanguageTree.root)));
+//					System.err.println(dist);
 				}
 			}
 
-//			// TODO
-//			String[] forms = new String[] { "w1", "w2", "w3", "w4", "w5", "w6", "w7", "w8", "w9", "w10", "w11",
-//					"w12", };
-//			System.out.println("     " + String.join("   ", forms));
-//			for (int i = 0; i < forms.length; i++) {
-//				String lang1 = forms[i];
-//				System.out.print(lang1 + "  ");
-//				if (lang1.length() < 3) {
-//					System.out.print(" ");
-//				}
-//				for (int j = 0; j < forms.length; j++) {
-//					if (i > j) {
-//						System.out.print("     ");
-//					} else {
-//						String lang2 = forms[j];
-//						System.out.print("%.1f  ".formatted(
-//								SampleIdeaGenerator.distToExpectedSim(distances.get(new Pair<>(lang1, lang2)))));
-//					}
-//				}
-//				System.out.println();
-//			}
+			System.err.println("EXPECTED DISTANCES");
+			List<String> forms = new ArrayList<>();
+			formsToLangs.keySet().forEach(forms::add);
+			Collections.sort(forms, new Comparator<String>() {
+				@Override
+				public int compare(String o1, String o2) {
+					return Integer.compare(Integer.parseInt(o1.substring(1)), Integer.parseInt(o2.substring(1)));
+				}
+			});
+			System.out.println("     " + String.join("   ", forms));
+			for (int i = 0; i < forms.size(); i++) {
+				String lang1 = forms.get(i);
+				System.out.print(lang1 + "  ");
+				if (lang1.length() < 3) {
+					System.out.print(" ");
+				}
+				for (int j = 0; j < forms.size(); j++) {
+					if (i > j) {
+						System.out.print("     ");
+					} else {
+						String lang2 = forms.get(j);
+						System.out.print("%.1f  ".formatted(
+								SampleIdeaGenerator.distToExpectedSim(formDistances.get(new Pair<>(lang1, lang2)))));
+					}
+				}
+				System.out.println();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -170,20 +204,22 @@ public class SampleData {
 	}
 
 	private static String lowestCommonAncestor(String node1, String node2, Map<String, String> formToSource) {
-		List<String> ancestors1 = new ArrayList<>();
+		List<String> path1 = new ArrayList<>();
+		path1.add(node1);
 		String anc = node1;
 		while (formToSource.containsKey(anc)) {
 			anc = formToSource.get(anc);
-			ancestors1.add(anc);
+			path1.add(anc);
 		}
-		List<String> ancestors2 = new ArrayList<>();
+		List<String> path2 = new ArrayList<>();
+		path2.add(node2);
 		anc = node2;
 		while (formToSource.containsKey(anc)) {
 			anc = formToSource.get(anc);
-			ancestors2.add(anc);
+			path2.add(anc);
 		}
-		for (String anc2 : ancestors2) {
-			if (ancestors1.contains(anc2)) {
+		for (String anc2 : path2) {
+			if (path1.contains(anc2)) {
 				return anc2;
 			}
 		}

@@ -112,11 +112,12 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 		}
 
 		List<String> allForms = new ArrayList<>();
-		langsToForms.values().forEach(allForms::addAll);
+		data.formsToLangs.keySet().forEach(allForms::add);
 		for (int i = 0; i < allForms.size() - 1; i++) {
 			String formIdI = allForms.get(i);
 			pslProblem.addObservation("Fsim", 1.0, formIdI, formIdI);
 			addHomsetInfo(formIdI, homPegs, data.formsToPegs);
+			System.err.println("Adding Fsim(" + formIdI + ", " + formIdI + ") 1.0"); // TODO del
 
 			// Compare phonetic forms.
 			boolean hasUnderlyingForm1 = data.knownForms.contains(formIdI);
@@ -125,10 +126,14 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 				if (!hasUnderlyingForm1 || !data.knownForms.contains(formIdJ)) {
 					pslProblem.addTarget("Fsim", formIdI, formIdJ);
 					pslProblem.addTarget("Fsim", formIdJ, formIdI);
+					System.err.println("Adding Fsim(" + formIdI + ", " + formIdJ + ") ?"); // TODO del
+					System.err.println("Adding Fsim(" + formIdJ + ", " + formIdI + ") ?"); // TODO del
 				} else {
 					double fSim = distToExpectedSim(data.formDistances.get(new Pair<>(formIdI, formIdJ)));
 					pslProblem.addObservation("Fsim", fSim, formIdI, formIdJ);
 					pslProblem.addObservation("Fsim", fSim, formIdJ, formIdI);
+					System.err.println("Adding Fsim(" + formIdI + ", " + formIdJ + ") " + fSim); // TODO del
+					System.err.println("Adding Fsim(" + formIdJ + ", " + formIdI + ") " + fSim); // TODO del
 				}
 			}
 		}
