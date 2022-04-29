@@ -1,16 +1,15 @@
 package de.tuebingen.sfs.eie.standalone.etymology;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 
 import de.tuebingen.sfs.eie.components.etymology.ideas.EtymologyIdeaGenerator;
 import de.tuebingen.sfs.eie.components.etymology.problems.EtymologyProblem;
-import de.tuebingen.sfs.eie.shared.core.LanguagePhylogeny;
 import de.tuebingen.sfs.eie.shared.util.Pair;
 import de.tuebingen.sfs.psl.util.data.Multimap;
 import de.tuebingen.sfs.psl.util.data.Multimap.CollectionType;
@@ -26,45 +25,16 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 
 	public void generateAtoms(SampleData data) {
 		Stack<String> langStack = new Stack<>();
-		Multimap<String, String> langsToForms = new Multimap<>(CollectionType.SET);
 		Set<String> homPegs = new HashSet<>();
 		for (String formId : data.formsToPegs.keySet()) {
 			String lang = data.formsToLangs.get(formId);
 			langStack.add(lang);
-			langsToForms.put(lang, formId);
 			homPegs.add(data.formsToPegs.get(formId));
 		}
 
-		// Language atoms
-		Set<String> langsAdded = new HashSet<>();
-		String anc = data.phylo.lowestCommonAncestor(langStack);
-		if (anc.equals(LanguagePhylogeny.root)) {
-			// If the selection contains languages from multiple different families,
-			// add languages + word forms from up to the earliest established contact.
-			// TODO warn user if there are no relevant contacts
-			Multimap<String, String> familyAncestorToLangs = new Multimap<>(CollectionType.SET);
-			for (String lang : langStack) {
-				familyAncestorToLangs.put(data.phylo.getPathFor(lang).get(0), lang);
-			}
-			for (Collection<String> relatedLangs : familyAncestorToLangs.values()) {
-				langStack.clear();
-				langStack.addAll(relatedLangs);
-				anc = data.phylo.lowestCommonAncestor(langStack);
-				addLanguageFamily(data.phylo, homPegs, anc, langStack, langsAdded, langsToForms);
-			}
-		} else {
-			// If there is a (non-root) common ancestor,
-			// add languages + word forms up to the lowest common ancestor.
-			addLanguageFamily(data.phylo, homPegs, anc, langStack, langsAdded, langsToForms);
-		}
-		for (String lang : langsAdded) {
-			if (data.phylo.hasIncomingInfluences(lang)) {
-				for (String contact : data.phylo.getIncomingInfluences(lang)) {
-					if (langsAdded.contains(contact)) {
-						pslProblem.addObservation("Xloa", 1.0, lang, contact);
-					}
-				}
-			}
+		Multimap<String, String> langsToForms = new Multimap<>(CollectionType.SET);
+		for (Entry<String, String> entry : data.formsToLangs.entrySet()) {
+			langsToForms.put(entry.getValue(), entry.getKey());
 		}
 
 		// Form atoms
@@ -85,7 +55,9 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 						}
 					}
 				}
+
 				String parent = data.phylo.parents.get(lang);
+				System.err.println(parent + " " + langsToForms.containsKey(parent) + " " + langsToForms.keySet());
 				if (langsToForms.containsKey(parent)) {
 					for (String parentFormId : langsToForms.get(parent)) {
 						pslProblem.addObservation("Xinh", 1.0, formId, parentFormId);
@@ -152,24 +124,6 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 
 		if (PRINT_LOG) {
 			super.pslProblem.printAtomsToConsole();
-		}
-	}
-
-	private void addLanguageFamily(LanguagePhylogeny phylo, Set<String> homPegs, String lowestCommonAnc,
-			Stack<String> langStack, Set<String> langsAdded, Multimap<String, String> langsToForms) {
-		logger.displayln("Adding languages descended from " + lowestCommonAnc + ":");
-		while (!langStack.isEmpty()) {
-			String lang = langStack.pop();
-			if (langsAdded.contains(lang)) {
-				continue;
-			}
-			logger.displayln("- " + lang);
-			langsAdded.add(lang);
-			String parent = phylo.parents.get(lang);
-			pslProblem.addObservation("Xinh", 1.0, lang, parent);
-			if (!parent.equals(lowestCommonAnc) && !langsAdded.contains(parent)) {
-				langStack.push(parent);
-			}
 		}
 	}
 
