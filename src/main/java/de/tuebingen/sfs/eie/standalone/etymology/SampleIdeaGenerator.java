@@ -90,6 +90,9 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 			pslProblem.addObservation("Fsim", 1.0, formIdI, formIdI);
 			addHomsetInfo(formIdI, homPegs, data.formsToPegs);
 			System.err.println("Adding Fsim(" + formIdI + ", " + formIdI + ") 1.0"); // TODO del
+			
+			// Make sure the EinhOrEloaOrEunk rule always gets grounded:
+			pslProblem.addObservation("Eloa", 0.0, formIdI, "eloaCtrl");
 
 			// Compare phonetic forms.
 			boolean hasUnderlyingForm1 = data.knownForms.contains(formIdI);
@@ -112,6 +115,7 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 		String lastForm = allForms.get(allForms.size() - 1);
 		addHomsetInfo(lastForm, homPegs, data.formsToPegs);
 		pslProblem.addObservation("Fsim", 1.0, lastForm, lastForm);
+		pslProblem.addObservation("Eloa", 0.0, lastForm, "eloaCtrl");
 
 		System.err.println("Forms and languages");
 		for (String form : allForms) {

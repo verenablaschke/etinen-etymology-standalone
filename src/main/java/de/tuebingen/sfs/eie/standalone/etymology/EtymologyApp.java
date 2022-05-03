@@ -11,6 +11,9 @@ import de.tuebingen.sfs.psl.gui.StandaloneFactWindowLauncher;
 import de.tuebingen.sfs.psl.util.log.InferenceLogger;
 
 public class EtymologyApp {
+	
+	static String etymWithBorrowing = "src/main/resources/sampledata/wordtree.txt";
+	static String etymInherited = "src/main/resources/sampledata/inherited.txt";
 
 	public static void main(String[] args) {
 		boolean printExplanations = true;
@@ -20,7 +23,7 @@ public class EtymologyApp {
 		config.setNonPersistableFeatures("EtymologyProblem", problemManager.getDbManager());
 		EtymologyProblem problem = new EtymologyProblem(config);
 		SampleIdeaGenerator ideaGen = new SampleIdeaGenerator(problem);
-		ideaGen.generateAtoms(new SampleData());
+		ideaGen.generateAtoms(new SampleData(etymWithBorrowing));
 		InferenceResult result = problemManager.registerAndRunProblem(problem);
 		RuleAtomGraph rag = result.getRag();
 		rag.printToStream(System.out);

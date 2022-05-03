@@ -32,9 +32,9 @@ public class SampleData {
 	Map<String, String> formsToPegs = new HashMap<>();
 	Map<String, String> formsToLangs = new HashMap<>();
 
-	public SampleData() {
+	public SampleData(String etymologyFile) {
 		readTree("src/main/resources/sampledata/languages.txt");
-		readEtymology("src/main/resources/sampledata/wordtree.txt");
+		readEtymology(etymologyFile);
 
 		// For now: known forms = leaves
 		for (String form : forms) {
