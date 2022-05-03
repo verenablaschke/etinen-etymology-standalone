@@ -24,6 +24,7 @@ public class EtymologyApp {
 		EtymologyProblem problem = new EtymologyProblem(config);
 		SampleIdeaGenerator ideaGen = new SampleIdeaGenerator(problem);
 		ideaGen.generateAtoms(new SampleData(etymWithBorrowing));
+//		ideaGen.generateAtoms(new SampleData(etymInherited));
 		InferenceResult result = problemManager.registerAndRunProblem(problem);
 		RuleAtomGraph rag = result.getRag();
 		rag.printToStream(System.out);

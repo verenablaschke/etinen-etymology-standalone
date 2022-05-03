@@ -88,11 +88,14 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 		for (int i = 0; i < allForms.size() - 1; i++) {
 			String formIdI = allForms.get(i);
 			pslProblem.addObservation("Fsim", 1.0, formIdI, formIdI);
+			((EtymologyProblem) pslProblem).addFixedAtom("Fsim", formIdI, formIdI);
 			addHomsetInfo(formIdI, homPegs, data.formsToPegs);
 			System.err.println("Adding Fsim(" + formIdI + ", " + formIdI + ") 1.0"); // TODO del
-			
+
 			// Make sure the EinhOrEloaOrEunk rule always gets grounded:
 			pslProblem.addObservation("Eloa", 0.0, formIdI, "eloaCtrl");
+			// TODO this one should actually probably be properly excluded from the sidebar:
+			((EtymologyProblem) pslProblem).addFixedAtom("Eloa", formIdI, "eloaCtrl");
 
 			// Compare phonetic forms.
 			boolean hasUnderlyingForm1 = data.knownForms.contains(formIdI);
@@ -109,6 +112,8 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 					pslProblem.addObservation("Fsim", fSim, formIdJ, formIdI);
 					System.err.println("Adding Fsim(" + formIdI + ", " + formIdJ + ") " + fSim); // TODO del
 					System.err.println("Adding Fsim(" + formIdJ + ", " + formIdI + ") " + fSim); // TODO del
+					((EtymologyProblem) pslProblem).addFixedAtom("Fsim", formIdI, formIdJ);
+					((EtymologyProblem) pslProblem).addFixedAtom("Fsim", formIdJ, formIdI);
 				}
 			}
 		}
@@ -116,6 +121,9 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 		addHomsetInfo(lastForm, homPegs, data.formsToPegs);
 		pslProblem.addObservation("Fsim", 1.0, lastForm, lastForm);
 		pslProblem.addObservation("Eloa", 0.0, lastForm, "eloaCtrl");
+		((EtymologyProblem) pslProblem).addFixedAtom("Fsim", lastForm, lastForm);
+		// TODO see above
+		((EtymologyProblem) pslProblem).addFixedAtom("Fsim", lastForm, "eloaCtrl");
 
 		System.err.println("Forms and languages");
 		for (String form : allForms) {
@@ -138,6 +146,7 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 		if (pegForForm == null) {
 			for (String homPeg : homPegs) {
 				pslProblem.addTarget("Fhom", formId, homPeg, "C1");
+				((EtymologyProblem) pslProblem).addFixedAtom("Fhom", formId, homPeg, "C1");
 				System.err.println("Fhom(" + formId + ", " + homPeg + ", C1)");
 			}
 		} else {
