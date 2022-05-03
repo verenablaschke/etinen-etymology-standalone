@@ -76,7 +76,7 @@ public class SampleData {
 			int prevIndent = -1;
 			int curIndent;
 			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-				if (line.isEmpty())
+				if (line.strip().isEmpty())
 					continue;
 				for (curIndent = 0; curIndent < line.length() - 1; curIndent++) {
 					if (line.charAt(curIndent) != ' ') {
