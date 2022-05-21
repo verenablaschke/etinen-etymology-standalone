@@ -89,7 +89,8 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 			String formIdI = allForms.get(i);
 			pslProblem.addObservation("Fsim", 1.0, formIdI, formIdI);
 			((EtymologyProblem) pslProblem).addFixedAtom("Fsim", formIdI, formIdI);
-			addHomsetInfo(formIdI, homPegs, data.formsToPegs);
+			boolean hasUnderlyingForm1 = data.knownForms.contains(formIdI);
+			addHomsetInfo(formIdI, homPegs, data.formsToPegs, hasUnderlyingForm1);
 			System.err.println("Adding Fsim(" + formIdI + ", " + formIdI + ") 1.0"); // TODO del
 
 			// Make sure the EinhOrEloaOrEunk rule always gets grounded:
@@ -98,7 +99,6 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 			((EtymologyProblem) pslProblem).addFixedAtom("Eloa", formIdI, "eloaCtrl");
 
 			// Compare phonetic forms.
-			boolean hasUnderlyingForm1 = data.knownForms.contains(formIdI);
 			for (int j = i + 1; j < allForms.size(); j++) {
 				String formIdJ = allForms.get(j);
 				if (!hasUnderlyingForm1 || !data.knownForms.contains(formIdJ)) {
@@ -118,7 +118,7 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 			}
 		}
 		String lastForm = allForms.get(allForms.size() - 1);
-		addHomsetInfo(lastForm, homPegs, data.formsToPegs);
+		addHomsetInfo(lastForm, homPegs, data.formsToPegs, data.knownForms.contains(lastForm));
 		pslProblem.addObservation("Fsim", 1.0, lastForm, lastForm);
 		pslProblem.addObservation("Eloa", 0.0, lastForm, "eloaCtrl");
 		((EtymologyProblem) pslProblem).addFixedAtom("Fsim", lastForm, lastForm);
@@ -139,7 +139,7 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 		}
 	}
 
-	private void addHomsetInfo(String formId, Set<String> homPegs, Map<String, String> formsToPegs) {
+	private void addHomsetInfo(String formId, Set<String> homPegs, Map<String, String> formsToPegs, boolean knownForm) {
 		String pegForForm = formsToPegs.get(formId);
 		System.err.println("PEG: " + formId + " " + pegForForm);
 		// Currently assuming there's just one concept: C1
@@ -151,12 +151,18 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 			}
 		} else {
 			for (String homPeg : homPegs) {
-				if (homPeg.equals(pegForForm)) {
-					pslProblem.addObservation("Fhom", 1.0, formId, homPeg, "C1");
-					System.err.println("Fhom(" + formId + ", " + homPeg + ", C1) 1.0");
+				if (knownForm) {
+					if (homPeg.equals(pegForForm)) {
+						pslProblem.addObservation("Fhom", 1.0, formId, homPeg, "C1");
+						System.err.println("Fhom(" + formId + ", " + homPeg + ", C1) 1.0");
+
+					} else {
+						pslProblem.addObservation("Fhom", 0.0, formId, homPeg, "C1");
+						System.err.println("Fhom(" + formId + ", " + homPeg + ", C1) 0.0");
+					}
+					((EtymologyProblem) pslProblem).addFixedAtom("Fhom", formId, homPeg, "C1");
 				} else {
-					pslProblem.addObservation("Fhom", 0.0, formId, homPeg, "C1");
-					System.err.println("Fhom(" + formId + ", " + homPeg + ", C1) 0.0");
+					pslProblem.addTarget("Fhom", formId, homPeg, "C1");
 				}
 			}
 		}

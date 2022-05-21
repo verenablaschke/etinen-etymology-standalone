@@ -34,19 +34,14 @@ public class SampleData {
 
 	public SampleData(String etymologyFile) {
 		readTree("src/main/resources/sampledata/languages.txt");
-		readEtymology(etymologyFile);
+		System.err.println(phylo.toNewickString());
+		readEtymologies(etymologyFile);
 
 		// For now: known forms = leaves
 		for (String form : forms) {
 			if (!phylo.children.containsKey(formsToLangs.get(form))) {
 				knownForms.add(form);
 			}
-		}
-
-		// For now: assume we're dealing with a single homset
-		String peg = knownForms.iterator().next();
-		for (String knownForm : knownForms) {
-			formsToPegs.put(knownForm, peg);
 		}
 
 		System.err.println("FORMS");
@@ -66,44 +61,12 @@ public class SampleData {
 		System.err.println();
 	}
 
-	private void readEtymology(String file) {
+	private void readEtymologies(String file) {
 		try (BufferedReader reader = new BufferedReader(
 				new InputStreamReader(new FileInputStream(new File(file)), StandardCharsets.UTF_8))) {
 			Map<String, String> formToSource = new HashMap<>();
-			Stack<String> sourceStack = new Stack<>();
-			sourceStack.push(LanguageTree.root);
-			formDistances.put(new Pair<>(LanguageTree.root, LanguageTree.root), 0);
-			int prevIndent = -1;
-			int curIndent;
-			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-				if (line.strip().isEmpty())
-					continue;
-				for (curIndent = 0; curIndent < line.length() - 1; curIndent++) {
-					if (line.charAt(curIndent) != ' ') {
-						break;
-					}
-				}
 
-				// Language tree link
-				String form = line.replace("->", "").strip();
-				int distToSource = line.contains("->") ? loanDist : inhDist;
-				forms.add(form);
-				formsToLangs.put(form, form.replace("w", "L"));
-
-				while (curIndent <= prevIndent--) {
-					sourceStack.pop();
-				}
-				String source = sourceStack.peek();
-				formToSource.put(form, source);
-				formDistances.put(new Pair<>(form, source), distToSource);
-				formDistances.put(new Pair<>(source, form), distToSource);
-				formDistances.put(new Pair<>(form, form), 0);
-				int distSourceToRoot = formDistances.get(new Pair<>(source, LanguageTree.root));
-				formDistances.put(new Pair<>(form, LanguageTree.root), distSourceToRoot + distToSource);
-				formDistances.put(new Pair<>(LanguageTree.root, form), distSourceToRoot + distToSource);
-				sourceStack.push(form);
-				prevIndent = curIndent;
-			}
+			processEtymologyFile(reader, formToSource);
 
 			for (String form1 : formToSource.keySet()) {
 				for (String form2 : formToSource.keySet()) {
@@ -115,12 +78,6 @@ public class SampleData {
 									new Pair<>(lowestCommonAncestor(form1, form2, formToSource), LanguageTree.root));
 					formDistances.put(new Pair<>(form1, form2), dist);
 					formDistances.put(new Pair<>(form2, form1), dist);
-//					System.err.println("====");
-//					System.err.println(form1 + " " + formDistances.get(new Pair<>(form1, LanguageTree.root)));
-//					System.err.println(form2 + " " + formDistances.get(new Pair<>(form2, LanguageTree.root)));
-//					System.err.println(lowestCommonAncestor(form1, form2, formToSource) + " " + formDistances
-//							.get(new Pair<>(lowestCommonAncestor(form1, form2, formToSource), LanguageTree.root)));
-//					System.err.println(dist);
 				}
 			}
 
@@ -153,6 +110,49 @@ public class SampleData {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void processEtymologyFile(BufferedReader reader, Map<String, String> formToSource) throws IOException {
+		Stack<String> sourceStack = new Stack<>();
+		sourceStack.push(LanguageTree.root);
+		formDistances.put(new Pair<>(LanguageTree.root, LanguageTree.root), 0);
+		String currentPeg = null;
+		int prevIndent = -1;
+		int curIndent;
+		for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+			if (line.strip().isEmpty())
+				continue;
+			for (curIndent = 0; curIndent < line.length() - 1; curIndent++) {
+				if (line.charAt(curIndent) != ' ') {
+					break;
+				}
+			}
+
+			// Language tree link
+			String form = line.replace("->", "").strip();
+			int distToSource = line.contains("->") ? loanDist : inhDist;
+			forms.add(form);
+			formsToLangs.put(form, form.replace("w", "L"));
+
+			while (curIndent <= prevIndent--) {
+				sourceStack.pop();
+			}
+			String source = sourceStack.peek();
+			formToSource.put(form, source);
+			if (source.equals(LanguageTree.root)) {
+				distToSource = 8;
+				currentPeg = form;
+			}
+			formDistances.put(new Pair<>(form, source), distToSource);
+			formDistances.put(new Pair<>(source, form), distToSource);
+			formDistances.put(new Pair<>(form, form), 0);
+			int distSourceToRoot = formDistances.get(new Pair<>(source, LanguageTree.root));
+			formDistances.put(new Pair<>(form, LanguageTree.root), distSourceToRoot + distToSource);
+			formDistances.put(new Pair<>(LanguageTree.root, form), distSourceToRoot + distToSource);
+			sourceStack.push(form);
+			formsToPegs.put(form,currentPeg);
+			prevIndent = curIndent;
 		}
 	}
 
