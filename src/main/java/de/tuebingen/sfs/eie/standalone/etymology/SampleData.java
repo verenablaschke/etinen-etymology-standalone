@@ -34,6 +34,7 @@ public class SampleData {
 
 	public SampleData(String etymologyFile) {
 		readTree("src/main/resources/sampledata/languages.txt");
+		//readTree("src/main/resources/sampledata/languages-late-distant-contact.txt");
 		System.err.println(phylo.toNewickString());
 		readEtymologies(etymologyFile);
 

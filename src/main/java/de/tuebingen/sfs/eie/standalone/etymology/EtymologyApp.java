@@ -15,6 +15,8 @@ public class EtymologyApp {
 	static String etymInherited = "src/main/resources/sampledata/inherited.txt";
 	static String etymWithBorrowing = "src/main/resources/sampledata/wordtree.txt";
 	static String etymTwoSetsOneLoan = "src/main/resources/sampledata/two-sets-one-loan.txt";
+	static String etymTwoSetsOneLoanClearCase = "src/main/resources/sampledata/two-sets-one-loan-clear-case.txt";
+	static String etymOneSetOneInternalLoanClearCase = "src/main/resources/sampledata/one-sets-one-internal-loan-clear-case.txt";
 
 	public static void main(String[] args) {
 		boolean printExplanations = true;
@@ -26,7 +28,9 @@ public class EtymologyApp {
 		SampleIdeaGenerator ideaGen = new SampleIdeaGenerator(problem);
 //		ideaGen.generateAtoms(new SampleData(etymInherited));
 //		ideaGen.generateAtoms(new SampleData(etymWithBorrowing));
-		ideaGen.generateAtoms(new SampleData(etymTwoSetsOneLoan));
+//		ideaGen.generateAtoms(new SampleData(etymTwoSetsOneLoan));
+//		ideaGen.generateAtoms(new SampleData(etymTwoSetsOneLoanClearCase));
+		ideaGen.generateAtoms(new SampleData(etymOneSetOneInternalLoanClearCase));
 		InferenceResult result = problemManager.registerAndRunProblem(problem);
 		RuleAtomGraph rag = result.getRag();
 		rag.printToStream(System.out);
