@@ -38,8 +38,6 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
         }
 
         // Form atoms
-        // TODO check EtymologicalTheory to see if confirm Einh/Eloa/Eety belief values
-        // from previous inferences can be used here
         int maxDist = -1;
         for (String lang : langsToForms.keySet()) {
             for (String formId : langsToForms.get(lang)) {
@@ -142,27 +140,27 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
     private void addHomsetInfo(String formId, Set<String> homPegs, Map<String, String> formsToPegs, boolean knownForm) {
         String pegForForm = formsToPegs.get(formId);
         System.err.println("PEG: " + formId + " " + pegForForm);
-        // Currently assuming there's just one concept: C1
         if (pegForForm == null) {
             for (String homPeg : homPegs) {
-                pslProblem.addTarget("Fhom", formId, homPeg, "C1");
-                ((EtymologyProblem) pslProblem).addFixedAtom("Fhom", formId, homPeg, "C1");
-                System.err.println("Fhom(" + formId + ", " + homPeg + ", C1)");
+                pslProblem.addTarget("Fhom", formId, homPeg);
+                ((EtymologyProblem) pslProblem).addFixedAtom("Fhom", formId, homPeg);
+                System.err.println("Fhom(" + formId + ", " + homPeg + ")");
             }
         } else {
             for (String homPeg : homPegs) {
                 if (knownForm) {
                     if (homPeg.equals(pegForForm)) {
-                        pslProblem.addObservation("Fhom", 1.0, formId, homPeg, "C1");
-                        System.err.println("Fhom(" + formId + ", " + homPeg + ", C1) 1.0");
+                        pslProblem.addObservation("Fhom", 1.0, formId, homPeg);
+                        System.err.println("Fhom(" + formId + ", " + homPeg + ") 1.0");
 
                     } else {
-                        pslProblem.addObservation("Fhom", 0.0, formId, homPeg, "C1");
-                        System.err.println("Fhom(" + formId + ", " + homPeg + ", C1) 0.0");
+                        // TODO necessary?
+                        pslProblem.addObservation("Fhom", 0.0, formId, homPeg);
+                        System.err.println("Fhom(" + formId + ", " + homPeg + ") 0.0");
                     }
-                    ((EtymologyProblem) pslProblem).addFixedAtom("Fhom", formId, homPeg, "C1");
+                    ((EtymologyProblem) pslProblem).addFixedAtom("Fhom", formId, homPeg);
                 } else {
-                    pslProblem.addTarget("Fhom", formId, homPeg, "C1");
+                    pslProblem.addTarget("Fhom", formId, homPeg);
                 }
             }
         }
