@@ -29,8 +29,8 @@ public class EtymologyApp {
 //		ideaGen.generateAtoms(new SampleData(etymInherited));
 //		ideaGen.generateAtoms(new SampleData(etymWithBorrowing));
 //		ideaGen.generateAtoms(new SampleData(etymTwoSetsOneLoan));
-//		ideaGen.generateAtoms(new SampleData(etymTwoSetsOneLoanClearCase));
-		ideaGen.generateAtoms(new SampleData(etymOneSetOneInternalLoanClearCase));
+		ideaGen.generateAtoms(new SampleData(etymTwoSetsOneLoanClearCase));
+//		ideaGen.generateAtoms(new SampleData(etymOneSetOneInternalLoanClearCase));
 		InferenceResult result = problemManager.registerAndRunProblem(problem);
 		RuleAtomGraph rag = result.getRag();
 		rag.printToStream(System.out);
