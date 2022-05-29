@@ -9,6 +9,5 @@ PNGer:?
 
 PGer:?
  PWGer:?
-  PFra:?
-    nld:nemen
-    deu:nehmen
+  nld:nemen
+  deu:nehmen

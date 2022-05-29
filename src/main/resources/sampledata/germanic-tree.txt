@@ -2,12 +2,11 @@ PGer
  PNGer
   PWSca
    isl
-   nob
-  swe
-  dan
+   nob <- dan, deu
+  swe <- deu
+  dan <- deu
  PWGer
   OEng <- PNGer
-   eng
-  PFra
-   nld <- deu
-   deu <- nld
+   eng <- nld
+  nld
+  deu
