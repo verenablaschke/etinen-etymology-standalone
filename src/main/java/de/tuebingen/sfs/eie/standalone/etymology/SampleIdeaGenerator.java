@@ -131,8 +131,8 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
 
         // Make sure the EinhOrEloaOrEunk rule always gets grounded:
         pslProblem.addObservation("Eloa", 0.0, formId, "eloaCtrl");
-        // TODO this one should actually probably be properly excluded from the sidebar:
         ((EtymologyProblem) pslProblem).addFixedAtom("Eloa", formId, "eloaCtrl");
+        ((EtymologyProblem) pslProblem).addHiddenAtom("Eloa", formId, "eloaCtrl");
 
         return hasUnderlyingForm1;
     }
