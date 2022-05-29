@@ -1,0 +1,13 @@
+PGer
+ PNGer
+  PWSca
+   isl
+   nob
+  swe
+  dan
+ PWGer
+  OEng <- PNGer
+   eng
+  PFra
+   nld <- deu
+   deu <- nld

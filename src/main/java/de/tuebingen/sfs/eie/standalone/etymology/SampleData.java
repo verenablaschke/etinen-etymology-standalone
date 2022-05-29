@@ -32,9 +32,8 @@ public class SampleData {
 	Map<String, String> formsToPegs = new HashMap<>();
 	Map<String, String> formsToLangs = new HashMap<>();
 
-	public SampleData(String etymologyFile) {
-		readTree("src/main/resources/sampledata/languages.txt");
-		//readTree("src/main/resources/sampledata/languages-late-distant-contact.txt");
+	public SampleData(String treeFile, String etymologyFile) {
+		readTree(treeFile);
 		System.err.println(phylo.toNewickString());
 		readEtymologies(etymologyFile);
 
@@ -85,15 +84,16 @@ public class SampleData {
 			System.err.println("EXPECTED DISTANCES");
 			List<String> forms = new ArrayList<>();
 			formsToLangs.keySet().forEach(forms::add);
-			Collections.sort(forms, new Comparator<String>() {
+			Collections.sort(forms);
+			/*Collections.sort(forms, new Comparator<String>() {
 				@Override
 				public int compare(String o1, String o2) {
 					return Integer.compare(Integer.parseInt(o1.substring(1)), Integer.parseInt(o2.substring(1)));
 				}
-			});
+			});*/
 			System.out.println("     " + String.join("   ", forms));
 			for (int i = 0; i < forms.size(); i++) {
-				String lang1 = forms.get(i);
+				String lang1 = formsToLangs.get(forms.get(i));
 				System.out.print(lang1 + "  ");
 				if (lang1.length() < 3) {
 					System.out.print(" ");
@@ -102,9 +102,8 @@ public class SampleData {
 					if (i > j) {
 						System.out.print("     ");
 					} else {
-						String lang2 = forms.get(j);
 						System.out.print("%.1f  ".formatted(
-								SampleIdeaGenerator.distToExpectedSim(formDistances.get(new Pair<>(lang1, lang2)))));
+								SampleIdeaGenerator.distToExpectedSim(formDistances.get(new Pair<>(forms.get(i), forms.get(j))))));
 					}
 				}
 				System.out.println();
@@ -134,7 +133,11 @@ public class SampleData {
 			String form = line.replace("->", "").strip();
 			int distToSource = line.contains("->") ? loanDist : inhDist;
 			forms.add(form);
-			formsToLangs.put(form, form.replace("w", "L"));
+			if (form.contains(":")) {
+				formsToLangs.put(form, form.substring(0,form.indexOf(":")));
+			} else {
+				formsToLangs.put(form, form.replace("w", "L"));
+			}
 
 			while (curIndent <= prevIndent--) {
 				sourceStack.pop();

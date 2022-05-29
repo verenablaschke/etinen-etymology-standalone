@@ -1,0 +1,14 @@
+PNGer:?
+ PWSca:?
+  isl:taka
+  nob:ta
+ swe:ta
+ dan:tage
+ -> OEng:?
+  eng:take
+
+PGer:?
+ PWGer:?
+  PFra:?
+    nld:nemen
+    deu:nehmen
