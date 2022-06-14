@@ -1,30 +1,34 @@
+/*
+ * Copyright 2018–2022 University of Tübingen
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package de.tuebingen.sfs.eie.standalone.etymology;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
 
 import de.tuebingen.sfs.eie.shared.core.LanguagePhylogeny;
 import de.tuebingen.sfs.eie.shared.core.LanguageTree;
 import de.tuebingen.sfs.eie.shared.util.Pair;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public class SampleData {
 
 	static int inhDist = 1;
 	static int loanDist = 0;
 
+	// In lieu of using actual phonetic distances, this class infers expected distances from the word trees:
 	Map<Pair<String, String>, Integer> formDistances = new HashMap<>();
 	Set<String> forms = new HashSet<>();
 	LanguagePhylogeny phylo = new LanguagePhylogeny(new LanguageTree());
@@ -63,7 +67,7 @@ public class SampleData {
 
 	private void readEtymologies(String file) {
 		try (BufferedReader reader = new BufferedReader(
-				new InputStreamReader(new FileInputStream(new File(file)), StandardCharsets.UTF_8))) {
+				new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
 			Map<String, String> formToSource = new HashMap<>();
 
 			processEtymologyFile(reader, formToSource);
@@ -83,14 +87,8 @@ public class SampleData {
 
 			System.err.println("EXPECTED DISTANCES");
 			List<String> forms = new ArrayList<>();
-			formsToLangs.keySet().forEach(forms::add);
+			forms.addAll(formsToLangs.keySet());
 			Collections.sort(forms);
-			/*Collections.sort(forms, new Comparator<String>() {
-				@Override
-				public int compare(String o1, String o2) {
-					return Integer.compare(Integer.parseInt(o1.substring(1)), Integer.parseInt(o2.substring(1)));
-				}
-			});*/
 			System.out.println("     " + String.join("   ", forms));
 			for (int i = 0; i < forms.size(); i++) {
 				String lang1 = formsToLangs.get(forms.get(i));
@@ -102,8 +100,9 @@ public class SampleData {
 					if (i > j) {
 						System.out.print("     ");
 					} else {
-						System.out.print("%.1f  ".formatted(
-								SampleIdeaGenerator.distToExpectedSim(formDistances.get(new Pair<>(forms.get(i), forms.get(j))))));
+						System.out.printf(
+								"%.1f  ",
+								SampleIdeaGenerator.distToExpectedSim(formDistances.get(new Pair<>(forms.get(i), forms.get(j)))));
 					}
 				}
 				System.out.println();
@@ -121,7 +120,7 @@ public class SampleData {
 		int prevIndent = -1;
 		int curIndent;
 		for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-			if (line.strip().isEmpty())
+			if (line.isBlank())
 				continue;
 			for (curIndent = 0; curIndent < line.length() - 1; curIndent++) {
 				if (line.charAt(curIndent) != ' ') {
@@ -162,7 +161,7 @@ public class SampleData {
 
 	private void readTree(String treeFile) {
 		try (BufferedReader reader = new BufferedReader(
-				new InputStreamReader(new FileInputStream(new File(treeFile)), StandardCharsets.UTF_8))) {
+				new InputStreamReader(new FileInputStream(treeFile), StandardCharsets.UTF_8))) {
 			Stack<String> parentStack = new Stack<>();
 			parentStack.push(LanguageTree.root);
 			int prevIndent = -1;

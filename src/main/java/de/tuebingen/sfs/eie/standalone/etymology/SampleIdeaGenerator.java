@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018–2022 University of Tübingen
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package de.tuebingen.sfs.eie.standalone.etymology;
 
 import java.util.ArrayList;
@@ -6,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.Stack;
 
 import de.tuebingen.sfs.eie.components.etymology.ideas.EtymologyIdeaGenerator;
 import de.tuebingen.sfs.eie.components.etymology.problems.EtymologyProblem;
@@ -24,11 +38,8 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
     }
 
     public void generateAtoms(SampleData data) {
-        Stack<String> langStack = new Stack<>();
         Set<String> homPegs = new HashSet<>();
         for (String formId : data.formsToPegs.keySet()) {
-            String lang = data.formsToLangs.get(formId);
-            langStack.add(lang);
             homPegs.add(data.formsToPegs.get(formId));
         }
 
@@ -82,7 +93,7 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
         }
 
         List<String> allForms = new ArrayList<>();
-        data.formsToLangs.keySet().forEach(allForms::add);
+        allForms.addAll(data.formsToLangs.keySet());
         for (int i = 0; i < allForms.size() - 1; i++) {
             String formIdI = allForms.get(i);
             boolean hasUnderlyingForm1 = addAtomsForSingleForm(formIdI, data, homPegs);
@@ -93,14 +104,10 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
                 if (!hasUnderlyingForm1 || !data.knownForms.contains(formIdJ)) {
                     pslProblem.addTarget("Fsim", formIdI, formIdJ);
                     pslProblem.addTarget("Fsim", formIdJ, formIdI);
-                    System.err.println("Adding Fsim(" + formIdI + ", " + formIdJ + ") ?"); // TODO del
-                    System.err.println("Adding Fsim(" + formIdJ + ", " + formIdI + ") ?"); // TODO del
                 } else {
                     double fSim = distToExpectedSim(data.formDistances.get(new Pair<>(formIdI, formIdJ)));
                     pslProblem.addObservation("Fsim", fSim, formIdI, formIdJ);
                     pslProblem.addObservation("Fsim", fSim, formIdJ, formIdI);
-                    System.err.println("Adding Fsim(" + formIdI + ", " + formIdJ + ") " + fSim); // TODO del
-                    System.err.println("Adding Fsim(" + formIdJ + ", " + formIdI + ") " + fSim); // TODO del
                     ((EtymologyProblem) pslProblem).addFixedAtom("Fsim", formIdI, formIdJ);
                     ((EtymologyProblem) pslProblem).addFixedAtom("Fsim", formIdJ, formIdI);
                 }
@@ -127,7 +134,6 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
         ((EtymologyProblem) pslProblem).addFixedAtom("Fsim", formId, formId);
         boolean hasUnderlyingForm1 = data.knownForms.contains(formId);
         addHomsetInfo(formId, homPegs, data.formsToPegs, hasUnderlyingForm1);
-        System.err.println("Adding Fsim(" + formId + ", " + formId + ") 1.0"); // TODO del
 
         // Make sure the EinhOrEloaOrEunk rule always gets grounded:
         pslProblem.addObservation("Eloa", 0.0, formId, "eloaCtrl");
@@ -154,7 +160,6 @@ public class SampleIdeaGenerator extends EtymologyIdeaGenerator {
                         System.err.println("Fhom(" + formId + ", " + homPeg + ") 1.0");
 
                     } else {
-                        // TODO necessary?
                         pslProblem.addObservation("Fhom", 0.0, formId, homPeg);
                         System.err.println("Fhom(" + formId + ", " + homPeg + ") 0.0");
                     }
